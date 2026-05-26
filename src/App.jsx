@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import Vitrine from './pages/Vitrine';
+import DetalhesJogo from './pages/DetalhesJogo';
 
 import './App.css'
 
@@ -15,6 +16,7 @@ function App() {
         <main className="flex-grow flex items-center justify-center py-10">
           <Routes>
             <Route path='/' element={<Vitrine/>}></Route>
+            <Route path="/jogo/:id" element={<DetalhesJogo />} />
           </Routes>
         </main>
       </div>
