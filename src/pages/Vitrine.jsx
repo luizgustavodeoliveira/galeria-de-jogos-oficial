@@ -1,5 +1,6 @@
 import React, { useState, useEffect, use } from 'react';
 import { useNavigate } from 'react-router-dom';
+import FiltroGeneros from '../components/FiltroGeneros';
 
 const API_URL = 'https://alunos-ads-api-production.up.railway.app';
 
@@ -10,6 +11,9 @@ export default function Vitrine() {
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState(null);
     const navigate = useNavigate();
+
+    const [busca, setBusca] = useState('');
+    const [generosSelecionados, setGenerosSelecionados] = useState([]);
 
     useEffect(() => {
         fetch(`${API_URL}/jogos`)
@@ -26,6 +30,35 @@ export default function Vitrine() {
                 setCarregando(false);
             })
     }, []);
+
+    const generosDisponiveis = jogos.reduce((acc, jogo) => {
+        if(jogo.generos){
+            jogo.generos.forEach((gen) => {
+                if(!acc.includes(gen.nome)){
+                    acc.push(gen.nome);
+                };
+            });
+        };
+        return acc;
+    }, []);
+
+    const onAlterarGenero = (genero) => {
+        setGenerosSelecionados((prev) => 
+            prev.includes(genero)
+            ? prev.filter((g) => g !== genero)
+            : [...prev, genero]
+        );
+    };
+
+    const limparGeneros = () => {
+        setGenerosSelecionados([]);
+    };
+
+    const jogosFiltrados = jogos.filter((jogo) => {
+        const correspondenteGenero = generosSelecionados.length === 0 || (jogo.generos && jogo.generos.some(gen => generosSelecionados.includes(gen.nome)));
+
+        return correspondenteGenero
+    });
 
     if(carregando){
         return (
@@ -46,12 +79,19 @@ export default function Vitrine() {
 
     return (
         <div className="w-full max-w-6xl mx-auto px-4">
-            <h2 className="text-white font-light text-2xl tracking-wide mb-6 uppercase">
+            <FiltroGeneros
+                generosDisponiveis={generosDisponiveis}
+                generosSelecionados={generosSelecionados}
+                onAlterarGenero={onAlterarGenero}
+                onLimparGeneros={limparGeneros}
+            />
+
+            <h2 className="text-white font-light text-2xl tracking-wide mt-6 mb-6 uppercase">
                 Destaques e Recomendados
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
-                {jogos.map((jogo) => (
+                {jogosFiltrados.map((jogo) => (
                     <div
                         key={jogo.id}
                         onClick={() => navigate(`/jogo/${jogo.id}`)}
