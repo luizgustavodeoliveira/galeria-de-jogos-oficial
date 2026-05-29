@@ -1,46 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = 'https://alunos-ads-api-production.up.railway.app';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
   const [modoPrimeiroAcesso, setModoPrimeiroAcesso] = useState(false);
   const [matricula, setMatricula] = useState('');
   const [senha, setSenha] = useState('');
-  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
   
   const navigate = useNavigate();
+  const { login, primeiroAcesso, carregando } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setCarregando(true);
-
-    const rotaEndpoint = modoPrimeiroAcesso ? '/auth/primeiro-acesso' : '/auth/login';
+    setErro('');
 
     try {
-      const resposta = await fetch(`${API_URL}${rotaEndpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ matricula, senha })
-      });
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        throw new Error(dados.mensagem || 'Ocorreu um erro ao processar a requisição.');
-      }
-
       if (modoPrimeiroAcesso) {
+        await primeiroAcesso(matricula, senha);
         alert('Primeiro acesso registrado com sucesso! Agora realize o seu login de entrada.');
-        setModoPrimeiroAcesso(false); 
+        setModoPrimeiroAcesso(false);
+        setMatricula('');
+        setSenha('');
       } else {
-        localStorage.setItem('token', dados.token);
+        await login(matricula, senha);
         navigate('/');
       }
-    } catch (erro) {
-      alert(erro.message);
-    } finally {
-      setCarregando(false);
+    } catch (err) {
+      setErro(err.message || 'Ocorreu um erro ao processar a requisição.');
     }
   };
 
@@ -53,6 +40,12 @@ export default function Login() {
         </p>
       </div>
 
+      {erro && (
+        <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-xs">
+          {erro}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         
         <div className="flex flex-col gap-1.5">
@@ -62,7 +55,8 @@ export default function Login() {
             required
             value={matricula}
             onChange={(e) => setMatricula(e.target.value)}
-            className="bg-[#10141d] border border-[#2a475e] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#66c0f4] transition-colors"
+            disabled={carregando}
+            className="bg-[#10141d] border border-[#2a475e] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#66c0f4] transition-colors disabled:opacity-50"
             placeholder="Digite sua matrícula"
           />
         </div>
@@ -74,7 +68,8 @@ export default function Login() {
             required
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
-            className="bg-[#10141d] border border-[#2a475e] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#66c0f4] transition-colors"
+            disabled={carregando}
+            className="bg-[#10141d] border border-[#2a475e] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#66c0f4] transition-colors disabled:opacity-50"
             placeholder="••••••••"
           />
         </div>
@@ -94,8 +89,10 @@ export default function Login() {
             setModoPrimeiroAcesso(!modoPrimeiroAcesso);
             setMatricula('');
             setSenha('');
+            setErro('');
           }}
-          className="text-[#66c0f4] hover:underline text-xs bg-none border-none cursor-pointer"
+          disabled={carregando}
+          className="text-[#66c0f4] hover:underline text-xs bg-none border-none cursor-pointer disabled:opacity-50"
         >
           {modoPrimeiroAcesso ? 'Já possui cadastro? Entre por aqui' : 'É seu primeiro acesso? Registre-se aqui'}
         </button>

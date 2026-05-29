@@ -1,8 +1,7 @@
-import React, { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FiltroGeneros from '../components/FiltroGeneros';
-
-const API_URL = 'https://alunos-ads-api-production.up.railway.app';
+import { jogosService } from '../services/api';
 
 const IMAGEM_DEFAULT = 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=500&auto=format&fit=crop';
 
@@ -16,20 +15,25 @@ export default function Vitrine() {
     const [generosSelecionados, setGenerosSelecionados] = useState([]);
 
     useEffect(() => {
-        fetch(`${API_URL}/jogos`)
-            .then((res) => {
-                if (!res.ok) throw new Error('Erro ao conectar com o servidor da API.')
-                return res.json();
-            })
-            .then((data) => {
-                setJogos(data.itens || []);
-                setCarregando(false);
-            })
-            .catch((err) => {
-                setErro(err.message);
-                setCarregando(false);
-            })
+        carregarJogos();
     }, []);
+
+    const carregarJogos = async () => {
+        try {
+            setCarregando(true);
+            setErro(null);
+            const dados = await jogosService.listar(1, 100);
+            
+            // A API retorna { pagina, limite, total, paginas, itens }
+            const jogosList = dados.itens || [];
+            setJogos(jogosList);
+        } catch (err) {
+            setErro(err.message || 'Erro ao conectar com o servidor da API.');
+            setJogos([]);
+        } finally {
+            setCarregando(false);
+        }
+    };
 
     const generosDisponiveis = jogos.reduce((acc, jogo) => {
         if(jogo.generos){
@@ -56,8 +60,9 @@ export default function Vitrine() {
 
     const jogosFiltrados = jogos.filter((jogo) => {
         const correspondenteGenero = generosSelecionados.length === 0 || (jogo.generos && jogo.generos.some(gen => generosSelecionados.includes(gen.nome)));
+        const correspondenteTexto = busca === '' || jogo.titulo.toLowerCase().includes(busca.toLowerCase());
 
-        return correspondenteGenero
+        return correspondenteGenero && correspondenteTexto;
     });
 
     if(carregando){
@@ -86,8 +91,18 @@ export default function Vitrine() {
                 onLimparGeneros={limparGeneros}
             />
 
+            <div className="flex gap-4 mb-6 items-center">
+                <input 
+                    type="text"
+                    placeholder="Buscar jogos..."
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    className="flex-1 bg-[#10141d] border border-[#2a475e] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#66c0f4] transition-colors"
+                />
+            </div>
+
             <h2 className="text-white font-light text-2xl tracking-wide mt-6 mb-6 uppercase">
-                Destaques e Recomendados
+                Destaques e Recomendados {jogosFiltrados.length > 0 && `(${jogosFiltrados.length})`}
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
@@ -106,7 +121,7 @@ export default function Vitrine() {
                                     e.target.onerror = null;
                                     e.target.src = IMAGEM_DEFAULT;
                                 }}
-                            ></img>
+                            />
                         </div>
 
                         <div className="p-5 flex-grow flex flex-col justify-between min-h-[250px]">
@@ -120,7 +135,7 @@ export default function Vitrine() {
                                 {jogo.desenvolvedora ? (
                                     <span className="text-[#66c0f4] text-xs block mb-3 font-semibold tracking-wide uppercase">{jogo.desenvolvedora}</span>
                                 ) : (
-                                    <span>{"Desenvolvedor desconhecido"}</span>
+                                    <span className="text-[#66c0f4] text-xs block mb-3 font-semibold tracking-wide uppercase">Desenvolvedor desconhecido</span>
                                 )}
                                 <p className="text-[#acb2b8] text-xs leading-relaxed line-clamp-3 mb-3">
                                     {jogo.descricao || "Sem descrição disponível."}
@@ -141,7 +156,7 @@ export default function Vitrine() {
 
                             <div>
                                 Análises: <span className="text-[#66c0f4] font-medium">
-                                    {jogo._count?.reviews || "Nenhuma análise disponível."}   
+                                    {jogo._count?.reviews || 0}
                                 </span>
                             </div>
                         </div>
@@ -155,6 +170,13 @@ export default function Vitrine() {
                     </div>
                 ))}
             </div>
+
+            {jogosFiltrados.length === 0 && (
+                <div className="text-center py-20 px-6 border border-[#2a475e]/20 bg-[#2a475e]/5 rounded-md max-w-xl mx-auto">
+                    <p className="text-[#8f98a0] font-semibold">Nenhum jogo encontrado.</p>
+                    <p className="text-sm text-[#8f98a0]/70 mt-1">Tente ajustar seus filtros de busca.</p>
+                </div>
+            )}
         </div>
     );
 }

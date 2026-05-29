@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function FiltroGeneros({ generosDisponiveis, generosSelecionados, onAlterarGenero, onLimparGeneros}) {
+export default function FiltroGeneros({ generosDisponiveis, generosSelecionados, onAlterarGenero, onLimparGeneros }) {
     const [estaAberto, setEstaAberto] = useState(false);
     const dropdownRef = useRef(null);
 
     useEffect(() => {
         function handleClickFora(event) {
-            if(dropdownRef.current && !dropdownRef.current.contains(event.target)){
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setEstaAberto(false);
             };
         };
         document.addEventListener('mousedown', handleClickFora);
-        return () => {document.removeEventListener('mousedown', handleClickFora)};
+        return () => { document.removeEventListener('mousedown', handleClickFora) };
     }, []);
 
     return (
@@ -52,13 +52,12 @@ export default function FiltroGeneros({ generosDisponiveis, generosSelecionados,
                         {generosDisponiveis.map((genero) => {
                             const estaSelecionado = generosSelecionados.includes(genero);
                             return (
-                                <label 
+                                <label
                                     key={genero}
-                                    className={`flex items-center gap-3 px-2 py-1.5 rounded cursor-pointer transition-colors text-sm select-none ${
-                                    estaSelecionado  
-                                    ? 'bg-[#66c0f4]/10 text-white font-medium' 
-                                    : 'text-[#acb2b8] hover:bg-[#10141d] hover:text-white'
-                                    }`}
+                                    className={`flex items-center gap-3 px-2 py-1.5 rounded cursor-pointer transition-colors text-sm select-none ${estaSelecionado
+                                        ? 'bg-[#66c0f4]/10 text-white font-medium'
+                                        : 'text-[#acb2b8] hover:bg-[#10141d] hover:text-white'
+                                        }`}
                                 >
                                     <input
                                         type="checkbox"

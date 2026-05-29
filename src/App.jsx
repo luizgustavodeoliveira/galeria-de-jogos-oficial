@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import Vitrine from './pages/Vitrine';
 import DetalhesJogo from './pages/DetalhesJogo';
 import Login from './pages/Login';
+import Biblioteca from './pages/Biblioteca';
+import Estudio from './pages/Estudio';
+import RotaProtegida from './components/RotaProtegida';
 
 import './App.css'
 
@@ -19,6 +22,8 @@ function App() {
             <Route path='/' element={<Vitrine/>}></Route>
             <Route path='/login' element={<Login/>}></Route>
             <Route path="/jogo/:id" element={<DetalhesJogo />} />
+            <Route path="/biblioteca" element={<RotaProtegida><Biblioteca /></RotaProtegida>} />
+            <Route path="/estudio" element={<RotaProtegida><Estudio /></RotaProtegida>} />
           </Routes>
         </main>
       </div>
