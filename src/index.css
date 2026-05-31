@@ -4,3 +4,52 @@ body {
   background-color: #171a21;
   margin: 0;
 }
+
+/* Custom Scrollbars Premium */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #10141d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a475e;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #66c0f4;
+}
+
+/* Scrollbar específico para áreas menores (como o menu de opções) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2a475e;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #66c0f4;
+}
+
+/* Suporte para Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #2a475e #10141d;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #2a475e transparent;
+}

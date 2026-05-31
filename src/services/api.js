@@ -23,7 +23,11 @@ const request = async (endpoint, options = {}) => {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const errorMessage = errorData.mensagem || errorData.message || `Erro ${response.status}`;
+    let errorMessage = errorData.erro || errorData.mensagem || errorData.message || `Erro ${response.status}`;
+    if (errorData.problemas && Array.isArray(errorData.problemas)) {
+      const detalhes = errorData.problemas.map(p => `${p.campo}: ${p.mensagem}`).join(' | ');
+      errorMessage += ` - ${detalhes}`;
+    }
     throw new Error(errorMessage);
   }
 

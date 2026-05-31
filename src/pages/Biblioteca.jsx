@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { bibliotecaService } from '../services/api';
+import { bibliotecaService, jogosService } from '../services/api';
 
 const IMAGEM_DEFAULT = 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=500&auto=format&fit=crop';
 
@@ -29,11 +29,30 @@ export default function Biblioteca() {
     try {
       setCarregando(true);
       setErro(null);
-      const dados = await bibliotecaService.listar();
+      const [dadosBiblioteca, dadosJogos] = await Promise.all([
+        bibliotecaService.listar(),
+        jogosService.listar(1, 100)
+      ]);
 
       // A API retorna um array diretamente
-      const jogosFormatados = Array.isArray(dados) ? dados : (dados.itens || []);
-      setJogos(jogosFormatados);
+      const itensBiblioteca = Array.isArray(dadosBiblioteca) ? dadosBiblioteca : (dadosBiblioteca.itens || []);
+      const listaJogos = Array.isArray(dadosJogos) ? dadosJogos : (dadosJogos.itens || []);
+
+      const jogosCompletos = itensBiblioteca.map(item => {
+        const jogoParcial = item.jogo || item;
+        const jogoCompleto = listaJogos.find(j => j.id === jogoParcial.id) || {};
+        return {
+          ...item,
+          jogo: { 
+            ...jogoParcial, 
+            descricao: jogoCompleto.descricao || jogoParcial.descricao,
+            desenvolvedora: jogoCompleto.desenvolvedora || jogoParcial.desenvolvedora,
+            generos: jogoCompleto.generos || jogoParcial.generos
+          }
+        };
+      });
+
+      setJogos(jogosCompletos);
     } catch (err) {
       setErro(err.message || 'Erro ao carregar sua biblioteca.');
       setJogos([]);
@@ -67,10 +86,10 @@ export default function Biblioteca() {
 
   if (erro) {
     return (
-      <div className="text-center text-red-400 py-10 px-6 border border-red-500/20 bg-red-500/5 rounded-md max-w-xl mx-auto my-10">
-        <p className="font-semibold">Erro ao processar requisição.</p>
-        <p className="text-sm text-red-400/70 mt-1">{erro}</p>
-        <button onClick={() => navigate('/')} className="mt-4 text-xs bg-[#2a475e] text-white px-3 py-1.5 rounded hover:bg-[#345975] cursor-pointer">
+      <div className="text-center text-[#e05e5e] py-10 px-6 border border-[#e05e5e]/20 bg-[#e05e5e]/10 rounded-xl max-w-xl mx-auto my-10 shadow-lg backdrop-blur-sm">
+        <p className="font-semibold text-lg">Erro ao processar requisição.</p>
+        <p className="text-sm text-[#e05e5e]/80 mt-2">{erro}</p>
+        <button onClick={() => navigate('/')} className="mt-6 bg-gradient-to-r from-[#2a475e] to-[#203648] text-[#66c0f4] px-6 py-2 rounded-lg text-xs font-bold hover:from-[#345975] hover:to-[#2a475e] cursor-pointer border border-[#66c0f4]/30">
           Voltar para a Vitrine
         </button>
       </div>
@@ -82,9 +101,10 @@ export default function Biblioteca() {
       <div className="mb-8">
         <button
           onClick={() => navigate('/')}
-          className="text-[#66c0f4] hover:underline bg-none border-none cursor-pointer mb-6 text-sm flex items-center gap-1 font-medium transition-colors"
+          className="text-[#8f98a0] hover:text-[#66c0f4] bg-transparent border-none cursor-pointer mb-6 text-sm flex items-center gap-2 font-medium transition-colors group"
         >
-          ← Voltar para a Vitrine
+          <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          VOLTAR PARA A LOJA
         </button>
 
         <h1 className="text-white font-light text-3xl tracking-wide uppercase">
@@ -96,9 +116,8 @@ export default function Biblioteca() {
       </div>
 
       {jogos && jogos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {jogos.map((item) => {
-            // A API retorna { jogo: {...}, horasJogadas, adicionadoEm }
             const jogo = item.jogo || item;
             const horasJogadas = item.horasJogadas || 0;
             const adicionadoEm = item.adicionadoEm;
@@ -106,76 +125,75 @@ export default function Biblioteca() {
             return (
               <div
                 key={jogo.id}
-                className="bg-pink-500/10 rounded overflow-hidden border border-pink-500/30 cursor-pointer transition-all duration-200 hover:border-pink-500/60 hover:-translate-y-1 shadow-lg flex flex-col justify-between"
+                className="group bg-[#16202d]/90 backdrop-blur-md rounded-xl overflow-hidden border border-[#2a475e]/50 transition-all duration-400 hover:border-[#66c0f4]/60 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(102,192,244,0.12)] flex flex-col sm:flex-row shadow-lg h-full"
               >
-                <div
+                {/* IMAGE SECTION */}
+                <div 
+                  className="w-full sm:w-48 h-48 sm:h-auto shrink-0 bg-[#0d121a] cursor-pointer relative overflow-hidden flex items-center justify-center border-b sm:border-b-0 sm:border-r border-[#2a475e]/30" 
                   onClick={() => navigate(`/jogo/${jogo.id}`)}
-                  className="w-full h-44 bg-pink-500/5 flex items-center justify-center p-2"
                 >
-                  <img
-                    src={jogo.capaUrl || IMAGEM_DEFAULT}
-                    alt={jogo.titulo}
-                    className="w-full h-[160px] object-cover object-center bg-pink-500/5 block"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = IMAGEM_DEFAULT;
-                    }}
-                  />
+                   <img 
+                     src={jogo.capaUrl || IMAGEM_DEFAULT} 
+                     alt={jogo.titulo}
+                     className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105 absolute inset-0" 
+                     onLoad={(e) => {
+                        const { naturalWidth, naturalHeight } = e.target;
+                        if (naturalWidth / naturalHeight < 1.4) {
+                            e.target.classList.remove('object-cover', 'object-top');
+                            e.target.classList.add('object-contain');
+                        }
+                     }}
+                     onError={(e) => {
+                       e.target.onerror = null;
+                       e.target.src = IMAGEM_DEFAULT;
+                     }}
+                   />
                 </div>
 
-                <div className="p-5 flex-grow flex flex-col justify-between min-h-[250px]">
-                  <div>
-                    <h3 className="text-white font-medium text-base truncate mb-1.5">{jogo.titulo}</h3>
-                    <span className="text-[#567086] text-xs block mb-4">
-                      {jogo.generos && jogo.generos.length > 0
-                        ? jogo.generos.map((g) => g.nome).join(', ')
-                        : "Sem gênero"}
-                    </span>
-                    {jogo.desenvolvedora ? (
-                      <span className="text-pink-400 text-xs block mb-3 font-semibold tracking-wide uppercase">{jogo.desenvolvedora}</span>
-                    ) : (
-                      <span className="text-pink-400 text-xs block mb-3 font-semibold tracking-wide uppercase">Desenvolvedor desconhecido</span>
-                    )}
-                    <p className="text-[#acb2b8] text-xs leading-relaxed line-clamp-3 mb-3">
-                      {jogo.descricao || "Sem descrição disponível."}
-                    </p>
-                  </div>
-                </div>
+                {/* CONTENT SECTION */}
+                <div className="p-5 flex-1 flex flex-col justify-between min-w-0 overflow-hidden">
+                  <div className="min-w-0">
+                    <div className="flex justify-between items-start gap-4 mb-2">
+                      <div className="cursor-pointer min-w-0 flex-1 pr-2" onClick={() => navigate(`/jogo/${jogo.id}`)}>
+                         <h3 className="text-white font-bold text-[18px] truncate group-hover:text-[#66c0f4] transition-colors tracking-wide drop-shadow-sm" title={jogo.titulo}>{jogo.titulo}</h3>
+                         <span className="text-[#66c0f4] text-[10px] font-bold tracking-wider uppercase block truncate" title={jogo.desenvolvedora || "Desconhecido"}>
+                             {jogo.desenvolvedora || "Desconhecido"}
+                         </span>
+                      </div>
+                      <span className="text-[#b8cedf] font-bold text-sm bg-[#10141d]/80 px-2.5 py-1 rounded border border-[#2a475e]/50 shrink-0 whitespace-nowrap">
+                         {jogo.preco > 0 ? `R$ ${jogo.preco.toFixed(2)}` : "Gratuito"}
+                      </span>
+                    </div>
 
-                <div className="border-t border-pink-500/20 pt-3 flex flex-col gap-1 text-[11px] text-[#567086] p-2">
-                  <div>
-                    Adicionado em: <span className="text-[#8f98a0]">
-                      {adicionadoEm ? new Date(adicionadoEm).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                      }) : "Data desconhecida"}
-                    </span>
+                    <div className="text-[#8f98a0] text-xs font-mono tracking-tight flex flex-col gap-1.5 mt-5">
+                       <span className="flex items-center gap-1.5 truncate">
+                          <svg className="w-4 h-4 text-[#567086] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                          Adicionado em: <strong className="text-[#b8cedf] font-semibold truncate">{adicionadoEm ? new Date(adicionadoEm).toLocaleDateString('pt-BR') : "Desconhecida"}</strong>
+                       </span>
+                       <span className="flex items-center gap-1.5 truncate">
+                          <svg className="w-4 h-4 text-[#567086] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                          Horas jogadas: <strong className="text-[#66c0f4] font-bold truncate">{horasJogadas}h</strong>
+                       </span>
+                    </div>
                   </div>
 
-                  <div>
-                    Horas jogadas: <span className="text-pink-400 font-medium">
-                      {horasJogadas}h
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center p-2 gap-2">
-                  <span className="text-[#b8cedf] font-bold text-sm">{`R$ ${jogo.preco?.toFixed(2) || '0,00'}`}</span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => navigate(`/jogo/${jogo.id}`)}
-                      className="bg-pink-500/20 text-pink-300 px-3 py-2 rounded-sm text-xs font-bold hover:bg-pink-500/30 transition-colors cursor-pointer border border-pink-500/30 flex-1"
-                    >
-                      Ver
-                    </button>
-                    <button
-                      onClick={() => handleDeletarJogo(jogo.id)}
-                      disabled={deletando[jogo.id]}
-                      className="bg-red-500/20 text-red-300 px-3 py-2 rounded-sm text-xs font-bold hover:bg-red-500/30 transition-colors cursor-pointer border border-red-500/30 disabled:opacity-50"
-                    >
-                      {deletando[jogo.id] ? '...' : 'X'}
-                    </button>
+                  {/* ACTIONS */}
+                  <div className="flex flex-wrap justify-between items-center pt-4 mt-5 border-t border-[#2a475e]/30 gap-3">
+                      <button 
+                        onClick={() => handleDeletarJogo(jogo.id)}
+                        disabled={deletando[jogo.id]}
+                        className="text-[#e05e5e] hover:text-white bg-transparent hover:bg-[#e05e5e]/20 px-3 py-1.5 rounded text-xs font-bold transition-all border border-transparent hover:border-[#e05e5e]/30 flex items-center gap-1 cursor-pointer disabled:opacity-50 shrink-0"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        {deletando[jogo.id] ? 'Removendo...' : 'Remover'}
+                      </button>
+                      <button
+                        onClick={() => navigate(`/jogo/${jogo.id}`)}
+                        className="bg-gradient-to-r from-[#1a7bcb] to-[#145e9b] text-white hover:from-[#1e85dc] hover:to-[#176fa6] px-5 py-2 rounded-lg text-[11px] font-bold shadow-[0_4px_10px_rgba(26,123,203,0.3)] hover:shadow-[0_0_15px_rgba(102,192,244,0.4)] transition-all cursor-pointer uppercase tracking-wider flex items-center gap-1.5 group shrink-0"
+                      >
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                        Ver Jogo
+                      </button>
                   </div>
                 </div>
               </div>
@@ -183,10 +201,12 @@ export default function Biblioteca() {
           })}
         </div>
       ) : (
-        <div className="text-center py-20 px-6 border border-pink-500/20 bg-pink-500/5 rounded-md max-w-xl mx-auto">
-          <p className="text-[#8f98a0] font-semibold">Sua biblioteca está vazia.</p>
-          <p className="text-sm text-[#8f98a0]/70 mt-1">Comece a adicionar jogos à sua biblioteca!</p>
-          <button onClick={() => navigate('/')} className="mt-4 text-xs bg-pink-500/20 text-pink-300 px-3 py-1.5 rounded hover:bg-pink-500/30 cursor-pointer border border-pink-500/30">
+        <div className="text-center py-20 px-6 border border-[#2a475e]/30 bg-[#16202d]/80 backdrop-blur-md rounded-2xl max-w-xl mx-auto shadow-xl">
+           <svg className="w-16 h-16 mx-auto text-[#567086] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+           <p className="text-[#b8cedf] text-lg font-medium">Sua biblioteca está vazia.</p>
+           <p className="text-sm text-[#8f98a0] mt-2">Comece a adicionar jogos incríveis à sua coleção!</p>
+           <button onClick={() => navigate('/')} className="mt-6 bg-gradient-to-r from-[#2a475e] to-[#203648] text-[#66c0f4] px-6 py-2.5 rounded-lg text-xs font-bold shadow-md hover:shadow-[0_0_15px_rgba(102,192,244,0.2)] transition-all cursor-pointer tracking-wide uppercase border border-[#66c0f4]/30 group flex items-center gap-2 mx-auto">
+            <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Explorar Catálogo
           </button>
         </div>
