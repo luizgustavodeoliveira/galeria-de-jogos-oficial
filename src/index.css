@@ -47,9 +47,41 @@ body {
 html {
   scrollbar-width: thin;
   scrollbar-color: #2a475e #10141d;
+  overflow-x: hidden;
 }
 
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #2a475e transparent;
+}
+
+/* Ocultar barra de rolagem horizontal mantendo scroll funcional */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Prevenção de quebra de layout em telas extremamente pequenas (até 10px) */
+* {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Quebra de palavras forçada para textos em resoluções minúsculas */
+span, p, h1, h2, h3, h4, h5, h6, button, a, div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }

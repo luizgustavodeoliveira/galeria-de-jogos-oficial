@@ -65,8 +65,8 @@ export default function Carrinho() {
           {/* Lista de Itens */}
           <div className="flex-1 flex flex-col gap-4">
             {cartItems.map((item) => (
-              <div key={item.jogo.id} className="bg-[#10141d]/80 backdrop-blur-md p-4 rounded-xl border border-[#2a475e]/40 flex flex-col sm:flex-row items-center gap-6 shadow-lg hover:border-[#66c0f4]/40 transition-colors">
-                <div className="w-32 h-20 shrink-0 bg-[#0d121a] rounded overflow-hidden flex items-center justify-center border border-[#2a475e]/30">
+              <div key={item.jogo.id} className="bg-[#10141d]/80 backdrop-blur-md p-4 rounded-xl border border-[#2a475e]/40 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-lg hover:border-[#66c0f4]/40 transition-colors w-full max-w-full overflow-hidden">
+                <div className="w-24 sm:w-32 h-16 sm:h-20 shrink bg-[#0d121a] rounded overflow-hidden flex items-center justify-center border border-[#2a475e]/30 max-w-full">
                   <img 
                     src={item.jogo.capaUrl || IMAGEM_DEFAULT} 
                     alt={item.jogo.titulo} 
@@ -78,14 +78,14 @@ export default function Carrinho() {
                   />
                 </div>
                 
-                <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left w-full">
-                  <h3 className="text-white text-lg font-bold tracking-wide mb-1">{item.jogo.titulo}</h3>
+                <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left w-full min-w-0">
+                  <h3 className="text-white text-base sm:text-lg font-bold tracking-wide mb-1 truncate w-full">{item.jogo.titulo}</h3>
                   <span className="text-[#8f98a0] text-xs font-mono">
                     {item.jogo.preco > 0 ? `R$ ${item.jogo.preco.toFixed(2)} unitário` : 'Gratuito'}
                   </span>
                 </div>
-
-                <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-start">
+ 
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full sm:w-auto justify-center sm:justify-start">
                   <div className="flex items-center bg-[#16202d] rounded-lg border border-[#2a475e]/50 overflow-hidden shadow-inner">
                     <button 
                       onClick={() => atualizarQuantidade(item.jogo.id, item.quantidade - 1)}
@@ -103,12 +103,12 @@ export default function Carrinho() {
                     </button>
                   </div>
                   
-                  <div className="w-24 text-right">
-                    <strong className="text-[#b8cedf] text-lg font-bold">
+                  <div className="w-auto sm:w-24 text-center sm:text-right">
+                    <strong className="text-[#b8cedf] text-base sm:text-lg font-bold">
                       {item.jogo.preco > 0 ? `R$ ${(item.jogo.preco * item.quantidade).toFixed(2)}` : 'Gratuito'}
                     </strong>
                   </div>
-
+ 
                   <button 
                     onClick={() => removerDoCarrinho(item.jogo.id)}
                     className="text-[#e05e5e] hover:text-white bg-transparent hover:bg-[#e05e5e]/20 p-2 rounded transition-all cursor-pointer border border-transparent hover:border-[#e05e5e]/30"

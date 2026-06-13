@@ -228,17 +228,17 @@ export default function Estudio() {
                     {jogo.generos?.map(g => g.nome).join(', ') || 'Sem gênero'}
                   </p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
                   <button
                     onClick={() => abrirModalEditar(jogo)}
-                    className="flex-1 bg-gradient-to-r from-[#2a475e] to-[#203648] text-[#66c0f4] py-2 rounded-lg text-xs font-bold hover:from-[#345975] hover:to-[#2a475e] transition-all cursor-pointer border border-[#66c0f4]/30 shadow-md flex justify-center items-center gap-1.5 uppercase tracking-wide"
+                    className="flex-grow sm:flex-1 bg-gradient-to-r from-[#2a475e] to-[#203648] text-[#66c0f4] py-2 rounded-lg text-xs font-bold hover:from-[#345975] hover:to-[#2a475e] transition-all cursor-pointer border border-[#66c0f4]/30 shadow-md flex justify-center items-center gap-1.5 uppercase tracking-wide min-w-[80px]"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     Editar
                   </button>
                   <button
                     onClick={() => handleDeletar(jogo.id)}
-                    className="flex-1 bg-[#10141d] text-[#e05e5e] border border-[#e05e5e]/30 hover:bg-[#e05e5e]/10 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-md flex justify-center items-center gap-1.5 uppercase tracking-wide"
+                    className="flex-grow sm:flex-1 bg-[#10141d] text-[#e05e5e] border border-[#e05e5e]/30 hover:bg-[#e05e5e]/10 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-md flex justify-center items-center gap-1.5 uppercase tracking-wide min-w-[80px]"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     Excluir
