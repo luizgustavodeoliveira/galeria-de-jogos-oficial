@@ -6,7 +6,7 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [carregando, setCarregando] = useState(false);
+  const [carregando, setCarregando] = useState(!!localStorage.getItem('token'));
   const [erro, setErro] = useState(null);
 
   // Buscar dados do usuário autenticado

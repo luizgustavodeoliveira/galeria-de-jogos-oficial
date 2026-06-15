@@ -9,7 +9,13 @@ export default function Login() {
   const [erro, setErro] = useState('');
   
   const navigate = useNavigate();
-  const { login, primeiroAcesso, carregando } = useAuth();
+  const { login, primeiroAcesso, carregando, estaAutenticado } = useAuth();
+
+  React.useEffect(() => {
+    if (estaAutenticado) {
+      navigate('/', { replace: true });
+    }
+  }, [estaAutenticado, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

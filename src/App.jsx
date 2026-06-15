@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -10,12 +10,27 @@ import Biblioteca from './pages/Biblioteca';
 import Estudio from './pages/Estudio';
 import Carrinho from './pages/Carrinho';
 import RotaProtegida from './components/RotaProtegida';
+import { useAuth } from './contexts/AuthContext';
 
 import './App.css'
 
+function RotaInvalida() {
+  const { estaAutenticado, carregando } = useAuth();
+
+  if (carregando) {
+    return (
+      <div className="text-center text-[#8f98a0] py-20 animate-pulse text-lg">
+        Carregando...
+      </div>
+    );
+  }
+
+  return <Navigate to={estaAutenticado ? "/" : "/login"} replace />;
+}
+
 function App() {
   return (
-    <Router>
+    <Router basename="/galeria-de-jogos-oficial">
       <div className="bg-gradient-to-b from-[#1b2838] to-[#171a21] text-[#c7d5e0] min-h-screen flex flex-col justify-between selection:bg-[#66c0f4] selection:text-black w-full max-w-full overflow-x-hidden">
         <Navbar/>
 
@@ -27,6 +42,7 @@ function App() {
             <Route path="/biblioteca" element={<RotaProtegida><Biblioteca /></RotaProtegida>} />
             <Route path="/estudio" element={<RotaProtegida><Estudio /></RotaProtegida>} />
             <Route path="/carrinho" element={<Carrinho />} />
+            <Route path="*" element={<RotaInvalida />} />
           </Routes>
         </main>
 

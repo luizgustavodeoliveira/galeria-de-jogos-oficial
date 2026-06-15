@@ -12,17 +12,7 @@ Uma plataforma premium para explorar, avaliar e gerenciar jogos digitais, com um
   [![React Router](https://img.shields.io/badge/React_Router-7.15-CA4245?logo=reactrouter&logoColor=white)](https://reactrouter.com/)
 </div>
 
----
 
-## 📱 Visualização do Projeto
-
-Abaixo, veja a interface do projeto rodando perfeitamente tanto em computadores quanto em dispositivos móveis graças à sua responsividade premium:
-
-<div align="center">
-  <img src="./assets/mockup.png" alt="Mockup do Projeto no Desktop e Mobile" width="850" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
-</div>
-
----
 
 ## ⚙️ Funcionalidades Principais
 
